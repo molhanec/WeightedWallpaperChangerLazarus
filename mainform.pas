@@ -6,14 +6,14 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, Menus,
-  ActnList, StdCtrls, Settings, ImageList;
+  ActnList, StdCtrls, ComCtrls, Buttons, Settings, ImageList;
 
 type
 
   { TMainForm }
 
   TMainForm = class(TForm)
-    Filenames: TListBox;
+    BitBtn1: TBitBtn;
     ReloadImagesButton: TButton;
     SelectFolderButton: TButton;
     ExitAction: TAction;
@@ -27,6 +27,7 @@ type
     Timer: TTimer;
     TrayIconPopupMenu: TPopupMenu;
     TrayIcon: TTrayIcon;
+    Filenames: TTreeView;
     procedure ReloadImagesButtonClick(Sender: TObject);
     procedure SelectFolderButtonClick(Sender: TObject);
     procedure ExitActionExecute(Sender: TObject);
@@ -43,6 +44,7 @@ type
     procedure MinimizeToTray;
     procedure ShowSettings;
     procedure LoadImageList;
+    procedure ShowGroup(Item: TObject; const Key: string; var Continue: Boolean);
   public
 
   end;
@@ -134,15 +136,29 @@ begin
   ImagesFolder.Text := Settings.ImagesFolder;
 end;
 
+procedure TMainForm.ShowGroup(Item: TObject; const Key: string; var Continue: Boolean);
+var
+  filenamesInGroup: TStringList;
+  group: TTreeNode;
+  i: integer;
+begin
+  filenamesInGroup := Item as TStringList;
+  group := Filenames.Items.Add(nil, Key);
+  for i := 0 to filenamesInGroup.Count - 1 do
+    Filenames.Items.AddChild(group, filenamesInGroup[i]);
+end;
+
 procedure TMainForm.LoadImageList;
 begin
   Timer.Enabled := False;
   FreeAndNil(ImageList);
+  Filenames.Items.Clear;
   if Settings.ImagesFolder = '' then Exit;
   ImageList := TImageList.Create;
   if ImageList.Load(Settings.ImagesFolder) then begin
     ImageList.UpdateWallpaper;
-    Filenames.Items := ImageList.Filenames;
+    ImageList.FilenameGroups.Iterate(@ShowGroup);
+    Filenames.AlphaSort;
     Timer.Enabled := True;
   end else begin
     FreeAndNil(ImageList);
