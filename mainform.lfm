@@ -4,7 +4,7 @@ object MainForm: TMainForm
   Top = 243
   Width = 664
   Caption = 'Weighted Wallpaper Changer'
-  ClientHeight = 387
+  ClientHeight = 390
   ClientWidth = 664
   Menu = MainMenu
   OnCloseQuery = FormCloseQuery
@@ -14,11 +14,11 @@ object MainForm: TMainForm
   LCLVersion = '2.0.2.0'
   object ImagesFolder: TLabeledEdit
     Left = 16
-    Height = 27
+    Height = 23
     Top = 24
     Width = 536
     Anchors = [akTop, akLeft, akRight]
-    EditLabel.Height = 17
+    EditLabel.Height = 15
     EditLabel.Width = 536
     EditLabel.Caption = 'Folder with Images'
     EditLabel.ParentColor = False
@@ -44,25 +44,27 @@ object MainForm: TMainForm
     OnClick = ReloadImagesButtonClick
     TabOrder = 2
   end
-  object Filenames: TTreeView
-    Left = 16
-    Height = 321
-    Top = 56
-    Width = 536
-    Anchors = [akTop, akLeft, akRight, akBottom]
-    SortType = stText
-    TabOrder = 3
-  end
   object BitBtn1: TBitBtn
     Left = 560
     Height = 30
-    Top = 347
+    Top = 350
     Width = 91
     Action = ExitAction
     Anchors = [akRight, akBottom]
     Font.Color = clRed
     ParentFont = False
+    TabOrder = 3
+  end
+  object Filenames: TTreeView
+    Left = 16
+    Height = 327
+    Top = 56
+    Width = 536
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    AutoExpand = True
+    SortType = stText
     TabOrder = 4
+    Options = [tvoAutoExpand, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
   end
   object TrayIcon: TTrayIcon
     PopUpMenu = TrayIconPopupMenu

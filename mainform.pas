@@ -14,6 +14,7 @@ type
 
   TMainForm = class(TForm)
     BitBtn1: TBitBtn;
+    Filenames: TTreeView;
     ReloadImagesButton: TButton;
     SelectFolderButton: TButton;
     ExitAction: TAction;
@@ -27,7 +28,6 @@ type
     Timer: TTimer;
     TrayIconPopupMenu: TPopupMenu;
     TrayIcon: TTrayIcon;
-    Filenames: TTreeView;
     procedure ReloadImagesButtonClick(Sender: TObject);
     procedure SelectFolderButtonClick(Sender: TObject);
     procedure ExitActionExecute(Sender: TObject);
@@ -44,6 +44,7 @@ type
     procedure MinimizeToTray;
     procedure ShowSettings;
     procedure LoadImageList;
+    procedure ShowGroups;
     procedure ShowGroup(Item: TObject; const Key: string; var Continue: Boolean);
   public
 
@@ -112,6 +113,7 @@ procedure TMainForm.TimerTimer(Sender: TObject);
 begin
   if ImageList <> nil then ImageList.UpdateWallpaper
   else Timer.Enabled := False;
+  ShowGroups;
 end;
 
 procedure TMainForm.TrayIconClick(Sender: TObject);
@@ -136,29 +138,42 @@ begin
   ImagesFolder.Text := Settings.ImagesFolder;
 end;
 
+function FormatNameAndCount(name: string; count: integer): string;
+begin
+  result := name + ' [' + IntToStr(Count) + ']'
+end;
+
 procedure TMainForm.ShowGroup(Item: TObject; const Key: string; var Continue: Boolean);
 var
+  group: TFilenameGroup;
   filenamesInGroup: TStringList;
-  group: TTreeNode;
+  groupNode: TTreeNode;
   i: integer;
 begin
-  filenamesInGroup := Item as TStringList;
-  group := Filenames.Items.Add(nil, Key);
+  group := Item as TFilenameGroup;
+  filenamesInGroup := group.Filenames;
+  groupNode := Filenames.Items.Add(nil, FormatNameAndCount(Key, group.Count));
   for i := 0 to filenamesInGroup.Count - 1 do
-    Filenames.Items.AddChild(group, filenamesInGroup[i]);
+    Filenames.Items.AddChild(groupNode, FormatNameAndCount(filenamesInGroup[i], (group.Filenames.Objects[i] as TCount).Count));
+  Continue := true;
+end;
+
+procedure TMainForm.ShowGroups;
+begin
+  Filenames.Items.Clear;
+  ImageList.FilenameGroups.Iterate(@ShowGroup);
+  Filenames.AlphaSort;
 end;
 
 procedure TMainForm.LoadImageList;
 begin
   Timer.Enabled := False;
   FreeAndNil(ImageList);
-  Filenames.Items.Clear;
   if Settings.ImagesFolder = '' then Exit;
   ImageList := TImageList.Create;
   if ImageList.Load(Settings.ImagesFolder) then begin
     ImageList.UpdateWallpaper;
-    ImageList.FilenameGroups.Iterate(@ShowGroup);
-    Filenames.AlphaSort;
+    ShowGroups;
     Timer.Enabled := True;
   end else begin
     FreeAndNil(ImageList);
